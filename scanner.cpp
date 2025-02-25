@@ -10,6 +10,7 @@ Main.cpp:
 #include <fstream>
 #include <string>
 #include <ctype.h> // isalnum
+#include <cctype> // isalpha, isdigit
 #include <sstream> // istringstream
 
 #include "token.hpp"
@@ -47,10 +48,35 @@ bool tokenOneCheck(string str)
 
 bool tokenTwoCheck(string str)
 {
+    if (str.empty())
+        return false;
+    // checking first char to be a plus
+    if (str[0] != '+')
+        return false;
+    // going through given string but from the 2nd character
+    for (size_t i = 1; i < str.length(); i++)
+    {
+        if (!isdigit(str[i])) // checking if the rest are digits
+            return false;
+    }
+    return true;
 }
 
 bool tokenThreeCheck(string str)
 {
+    if (str.empty())
+        return false;
+    // checking if 1st character is a letter not a digit
+    if (!isalpha(str[0]))
+        return false;
+
+    // going through given string but from the 2nd character
+    for (size_t i = 1; i < str.length(); i++)
+    {
+        if (!isdigit(str[i])) // checking if the rest are digits
+            return false;
+    }
+    return true;
 }
 
 Token scanner(ifstream &inputFile, const string &filename, int line)

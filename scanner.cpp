@@ -33,10 +33,8 @@ bool tokenOneCheck(string str)
     {
         char c = str[i];
 
-        if (isalnum(c))
-            continue;
         if (c == '!' || c == '"' || c == '#' || c == '$' || c == '%' || c == '&' 
-            || c == '(' || c == ')')
+            || c == '(' || c == ')' || c == '\'' )
             continue;
         if (isspace(c))
             continue;
@@ -102,7 +100,7 @@ Token scanner(ifstream &inputFile, const string &filename, int line)
             {
                 if (!tokenOneCheck(word))
                 {
-                    cout << "Error: Invalid character or word " << endl;
+                    cout << "SCANNER ERROR: " << word << ", " << line << endl;
                     exit(1); 
                 }
             }

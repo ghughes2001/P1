@@ -25,6 +25,21 @@ bool isFileEmpty(const string &filename) {
     return file.peek() == std::ifstream::traits_type::eof();
 }
 
+// function to remove comments
+string removeComments(string str)
+{
+    size_t startOfComment = str.find('*');
+
+    while (startOfComment != string::npos) // if another '*' is found
+    {
+        size_t endOfComment = str.find('*', startOfComment + 1);
+        if (endOfComment == string::npos) // there is no other '*'
+            break;
+        return str.substr(0, startOfComment) + str.substr(endOfComment + 1); // removing the comment and everything inbetween
+    }
+    return str;
+}
+
 // checking if token 1
 // ! “ # $ % & ‘ ( ) 
 bool tokenOneCheck(string str)
@@ -93,16 +108,47 @@ Token scanner(ifstream &inputFile, const string &filename, int line)
     {
         while (getline(inputFile, lineContent))
         {
-            // accessing each string that is seperated by white-space separators
-            istringstream strDiv(line);
+            line++; // keep track of current line
+            lineContent = removeComments(lineContent); // removing comments
+            istringstream strDiv(lineContent); // accessing each string that is seperated by white-space separators
 
             while (strDiv >> word) // accessing word
             {
-                if (!tokenOneCheck(word))
+                // checking if token1
+                if (word.length() == 1)
                 {
-                    cout << "SCANNER ERROR: " << word << ", " << line << endl;
-                    exit(1); 
+                    if (!tokenOneCheck(word)) // invalid
+                    {
+                        cout << "SCANNER ERROR: " << word << ", " << line << endl;
+                        exit(1); 
+                    }
+                    return Token(t1_tk, word, line); // return valid token1
                 }
+                // checking if token2
+                if (word[0] == '+' && word.length() > 1)
+                {
+                    if (!tokenTwoCheck(word)) // invalid
+                    {
+                        cout << "SCANNER ERROR: " << word << ", " << line << endl;
+                        exit(1); 
+                    }
+                    return Token(t2_tk, word, line); // return valid token2
+                }
+                // checking if token3
+                if (isalpha(word[0]) && word.length() > 1)
+                {
+                    if (!tokenThreeCheck(word)) // invalid
+                    {
+                        cout << "SCANNER ERROR: " << word << ", " << line << endl;
+                        exit(1); 
+                    }
+                    return Token(t3_tk, word, line); // return valid token3
+                }
+            }
+            // checking if EOF is reached
+            if (inputFile.eof())
+            {
+                return Token(EOFTk, "EOF", line);
             }
         }
         inputFile.clear(); // Clear any EOF flag after reading the file

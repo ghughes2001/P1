@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
         ifstream myFile(file);
         if (!myFile.is_open())
         {
-            cout << "Error: User file could not opened" << endl;
+            cout << "Error: File could not be found" << endl;
             exit(1);
         }
         myFile.close();

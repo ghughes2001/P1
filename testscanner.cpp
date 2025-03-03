@@ -8,6 +8,7 @@ testscanner.cpp:
 */
 
 #include <iostream>
+#include <vector>
 #include <fstream>
 
 #include "token.hpp"
@@ -28,16 +29,21 @@ void testScanner(const string &file)
 
     while (true)
     {
-        Token token = scanner(readingFile, file, currentLine); // creating a token to access id, actual token, and line using scanner
-        // printing information about token
-        cout << token.tokenID << token.tokenInstance << token.lineNumber << endl;
+        vector<Token> tokens = scanner(readingFile, file, currentLine);  // Get all tokens for the current line
 
-        // ending the infinte while loop
-        if (token.tokenID == EOFTk)
+        // print information about all tokens in the vector
+        for (const Token &token : tokens)
+        {
+            cout << token.getTokenAsString() << "\t" << token.tokenInstance << "\t" << token.lineNumber << endl;
+        }
+
+        // End the loop when the EOF token is found
+        if (!tokens.empty() && tokens.back().tokenID == EOFTk)
         {
             break;
         }
-        currentLine++; // move to next line
+
+        currentLine++;  // move to the next line
     }
     readingFile.close();
 }

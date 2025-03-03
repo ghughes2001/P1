@@ -10,8 +10,10 @@ scanner.hpp:
 #define _SCANNER_HPP_
 
 #include <fstream>
+#include <vector>
+
 #include "token.hpp"
 
-Token scanner(std::ifstream &inputFile, const std::string &filename, int line);
+std::vector<Token> scanner(std::ifstream &inputFile, const std::string &filename, int line);
 
 #endif

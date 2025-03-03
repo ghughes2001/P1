@@ -2,7 +2,7 @@
 Author: Grant Hughes
 Created: February 23, 2025
 
-Main.cpp:
+scanner.hpp:
     - Creates scanner()
 */
 

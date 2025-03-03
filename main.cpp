@@ -12,6 +12,8 @@ Main.cpp:
 #include <fstream> // file handling
 #include <string>
 
+#include "testscanner.hpp"
+
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -40,6 +42,8 @@ int main(int argc, char* argv[])
             exit(1);
         }
         myFile.close();
+
+        testScanner(file); // calliing testScanner(const string &file) method
     }
     if (argc == 1)
     {
@@ -74,6 +78,8 @@ int main(int argc, char* argv[])
         // erasing contents of file so the next tree dosn't have it
         ofstream fileToClear("output.txt", ios::out | ios::trunc);
         fileToClear.close();
+
+        testScanner("output.txt"); // calliing testScanner(const string &file) method
     }
     return 0;
 }

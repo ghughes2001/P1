@@ -75,11 +75,12 @@ int main(int argc, char* argv[])
         }
         userFile.close();
 
-        // erasing contents of file so the next tree dosn't have it
+        testScanner("output.txt"); // calliing testScanner(const string &file) method
+
+        // erasing contents of file so the next user dosn't have it
         ofstream fileToClear("output.txt", ios::out | ios::trunc);
         fileToClear.close();
 
-        testScanner("output.txt"); // calliing testScanner(const string &file) method
     }
     return 0;
 }

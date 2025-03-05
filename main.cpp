@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
         {
             if (inputLine.empty())
                 continue;
-            writeFile << word << endl;
+            writeFile << inputLine << endl;
         }
         writeFile.close();
 

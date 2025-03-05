@@ -116,13 +116,12 @@ vector<string> splitTokens(string str) {
     return tokens;
 }
 
-vector<Token> scanner(ifstream &inputFile, const string &filename, int line)
+vector<Token> scanner(ifstream &inputFile, const string &filename, int startLine = 1)
 {
-    // variables
-    vector<Token> tokens; // hold all tokens
+    vector<Token> tokens;
     string lineContent;
+    int line = startLine;
 
-    // checking if there is contents in file
     if (isFileEmpty(filename))
     {
         cout << "Error: File missing data" << endl;
@@ -132,59 +131,55 @@ vector<Token> scanner(ifstream &inputFile, const string &filename, int line)
     {
         while (getline(inputFile, lineContent))
         {
-            line++; // keep track of current line
+            line++; // track line number
             lineContent = removeComments(lineContent); // removing comments
             vector<string> words = splitTokens(lineContent);
 
-            for (size_t i = 0; i < words.size(); i++) // accessing word
+            for (size_t i = 0; i < words.size(); i++) // process each word
             {
                 string word = words[i];
-                Token t(EOFTk, "EOF", line); // track current token
-                
-                // checking if token1
+                Token t(EOFTk, "EOF", line);
+
+                // check tokens
                 if (word.length() == 1)
                 {
-                    if (!tokenOneCheck(word)) // invalid
+                    if (!tokenOneCheck(word))
                     {
                         cout << "SCANNER ERROR: " << word << ", " << line << endl;
                         exit(1);
                     }
-                    t = Token(t1_tk, word, line); // return valid token1
+                    t = Token(t1_tk, word, line);
                 }
-                // checking if token2
-                if (word[0] == '+' && word.length() > 1)
+                else if (word[0] == '+' && word.length() > 1)
                 {
-                    if (!tokenTwoCheck(word)) // invalid
+                    if (!tokenTwoCheck(word))
                     {
                         cout << "SCANNER ERROR: " << word << ", " << line << endl;
                         exit(1);
                     }
-                    t = Token(t2_tk, word, line); // return valid token2
+                    t = Token(t2_tk, word, line);
                 }
-                // checking if token3
-                if (isalpha(word[0]) && word.length() > 1)
+                else if (isalpha(word[0]) && word.length() > 1)
                 {
-                    if (!tokenThreeCheck(word)) // invalid
+                    if (!tokenThreeCheck(word))
                     {
                         cout << "SCANNER ERROR: " << word << ", " << line << endl;
                         exit(1);
                     }
-                    t = Token(t3_tk, word, line); // return valid token3
+                    t = Token(t3_tk, word, line);
                 }
-                if (t.tokenID != EOFTk)  // Only adding tk1, tk2, tk3
+                if (t.tokenID != EOFTk)
                 {
-                    tokens.push_back(t); // add to vector
+                    tokens.push_back(t);
                 }
-            }
-            // checking if EOF is reached
-            if (inputFile.eof())
-            {
-                tokens.push_back(Token(EOFTk, "EOF", line)); // add EOF to list now
-                break;
             }
         }
-        inputFile.clear(); // Clear any EOF flag after reading the file
-        inputFile.seekg(0, ios::beg); // Go back to the beginning of the file
+
+        // Add the EOF token after reading all lines
+        tokens.push_back(Token(EOFTk, "EOF", line));
+
+        inputFile.clear();
+        inputFile.seekg(0, ios::beg);
         inputFile.close();
     }
     else
@@ -192,5 +187,6 @@ vector<Token> scanner(ifstream &inputFile, const string &filename, int line)
         cout << filename << " couldn't open" << endl;
         exit(1);
     }
+
     return tokens;
 }

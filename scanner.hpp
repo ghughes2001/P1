@@ -14,6 +14,6 @@ scanner.hpp:
 
 #include "token.hpp"
 
-std::vector<Token> scanner(std::ifstream &inputFile, const std::string &filename, int line);
+std::vector<Token> scanner(std::ifstream &inputFile, const std::string &filename, int startLine);
 
 #endif

@@ -1,17 +1,8 @@
-/*
-Author: Grant Hughes
-Created: February 23, 2025
-
-scanner.cpp:
-    - Scans and returns validated tokens
-*/
-
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
-#include <ctype.h> // isalnum
-#include <cctype> // isalpha, isdigit
+#include <cctype> // isalnum, isalpha, isdigit
 #include <sstream> // istringstream
 
 #include "token.hpp"
@@ -20,7 +11,6 @@ scanner.cpp:
 using namespace std;
 
 // checking if file is empty
-// https://solvepro.co/check-if-a-file-is-empty-in-c/
 bool isFileEmpty(const string &filename) {
     std::ifstream file(filename);
     return file.peek() == std::ifstream::traits_type::eof();
@@ -30,44 +20,37 @@ bool isFileEmpty(const string &filename) {
 string removeComments(string str)
 {
     size_t startOfComment = str.find('*');
-
     while (startOfComment != string::npos) // if another '*' is found
     {
         size_t endOfComment = str.find('*', startOfComment + 1);
         if (endOfComment == string::npos) // there is no other '*'
             break;
-        return str.substr(0, startOfComment) + str.substr(endOfComment + 1); // removing the comment and everything inbetween
+        return str.substr(0, startOfComment) + str.substr(endOfComment + 1); // removing the comment and everything in-between
     }
     return str;
 }
 
-// checking if token 1
-// ! “ # $ % & ‘ ( ) 
+// checking if token1
 bool tokenOneCheck(string str)
 {
     for (size_t i = 0; i < str.length(); i++)
     {
         char c = str[i];
-
         if (c == '!' || c == '"' || c == '#' || c == '$' || c == '%' || c == '&' 
             || c == '(' || c == ')' || c == '\'' )
             continue;
         if (isspace(c))
             continue;
-        
-        return false; //invalid
+        return false; // invalid
     }
     return true; // valid
 }
 
+// checking if token2 (numbers starting with a +)
 bool tokenTwoCheck(string str)
 {
-    if (str.empty())
+    if (str.empty() || str[0] != '+')
         return false;
-    // checking first char to be a plus
-    if (str[0] != '+')
-        return false;
-    // going through given string but from the 2nd character
     for (size_t i = 1; i < str.length(); i++)
     {
         if (!isdigit(str[i])) // checking if the rest are digits
@@ -76,29 +59,68 @@ bool tokenTwoCheck(string str)
     return true;
 }
 
+// checking if token3 (letters followed by digits)
 bool tokenThreeCheck(string str)
 {
-    if (str.empty())
+    if (str.empty() || !isalpha(str[0]))
         return false;
-    // checking if 1st character is a letter not a digit
-    if (!isalpha(str[0]))
-        return false;
-
-    // going through given string but from the 2nd character
     for (size_t i = 1; i < str.length(); i++)
     {
         if (!isdigit(str[i])) // checking if the rest are digits
             return false;
     }
     return true;
+}
+
+// Function that splits merged tokens/checks token
+vector<string> splitTokens(string str) {
+    vector<string> tokens;
+    string token;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        char c = str[i];
+
+        // Case 1: Alphanumeric characters or '+' (if followed by digits)
+        if (isalnum(c) || (c == '+' && i + 1 < str.length() && isdigit(str[i + 1]))) {
+            token += c;  // Append to the current token
+        }
+        // Case 2: Transition from a number (with a '+' sign) to a letter or vice versa
+        else if ((isdigit(c) && !token.empty() && isalpha(token.back())) || 
+                 (isalpha(c) && !token.empty() && isdigit(token.back())) ||
+                 (c == '+' && isdigit(str[i+1]) && !token.empty() && isalpha(token.back()))) {
+            tokens.push_back(token);  // Add the current token
+            token = c;  // Start a new token with the current character
+        }
+        // Case 3: Special characters treated as separate tokens
+        else if (!isspace(c)) {
+            if (!token.empty()) {
+                tokens.push_back(token);  // Add the current token to the list
+                token.clear();  // Clear the current token
+            }
+            tokens.push_back(string(1, c));  // Add special character as a separate token
+        }
+        // Case 4: Whitespace - finalize the current token if any
+        else if (isspace(c)) {
+            if (!token.empty()) {
+                tokens.push_back(token);  // Add the current token
+                token.clear();  // Clear for next token
+            }
+        }
+    }
+
+    // Add any remaining token at the end
+    if (!token.empty()) {
+        tokens.push_back(token);
+    }
+
+    return tokens;
 }
 
 vector<Token> scanner(ifstream &inputFile, const string &filename, int line)
 {
     // variables
-    vector<Token> tokens; //hold all tokens
+    vector<Token> tokens; // hold all tokens
     string lineContent;
-    string word;
 
     // checking if there is contents in file
     if (isFileEmpty(filename))
@@ -112,11 +134,13 @@ vector<Token> scanner(ifstream &inputFile, const string &filename, int line)
         {
             line++; // keep track of current line
             lineContent = removeComments(lineContent); // removing comments
-            istringstream strDiv(lineContent); // accessing each string that is separated by white-space separators
+            vector<string> words = splitTokens(lineContent);
 
-            while (strDiv >> word) // accessing word
+            for (size_t i = 0; i < words.size(); i++) // accessing word
             {
+                string word = words[i];
                 Token t(EOFTk, "EOF", line); // track current token
+                
                 // checking if token1
                 if (word.length() == 1)
                 {

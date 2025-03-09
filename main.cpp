@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
             exit(1);
         }
         userFile.close();
-
+        
+        cout << "Output: " << endl;
         testScanner("output.txt"); // calliing testScanner(const string &file) method
 
         // erasing contents of file so the next user dosn't have it

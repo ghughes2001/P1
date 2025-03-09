@@ -75,44 +75,87 @@ bool tokenThreeCheck(string str)
 // Function that splits merged tokens/checks token
 vector<string> splitTokens(string str) {
     vector<string> tokens;
-    string token;
+    string currentToken;
 
     for (size_t i = 0; i < str.length(); i++) {
         char c = str[i];
-
-        // Case 1: Alphanumeric characters or '+' (if followed by digits)
-        if (isalnum(c) || (c == '+' && i + 1 < str.length() && isdigit(str[i + 1]))) {
-            token += c;  // Append to the current token
-        }
-        // Case 2: Transition from a number (with a '+' sign) to a letter or vice versa
-        else if ((isdigit(c) && !token.empty() && isalpha(token.back())) || 
-                 (isalpha(c) && !token.empty() && isdigit(token.back())) ||
-                 (c == '+' && isdigit(str[i+1]) && !token.empty() && isalpha(token.back()))) {
-            tokens.push_back(token);  // Add the current token
-            token = c;  // Start a new token with the current character
-        }
-        // Case 3: Special characters treated as separate tokens
-        else if (!isspace(c)) {
-            if (!token.empty()) {
-                tokens.push_back(token);  // Add the current token to the list
-                token.clear();  // Clear the current token
+        
+        // Skip whitespace, but finalize any current token
+        if (isspace(c)) {
+            if (!currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
             }
-            tokens.push_back(string(1, c));  // Add special character as a separate token
+            continue;
         }
-        // Case 4: Whitespace - finalize the current token if any
-        else if (isspace(c)) {
-            if (!token.empty()) {
-                tokens.push_back(token);  // Add the current token
-                token.clear();  // Clear for next token
+        
+        // Handle special characters (token type t1)
+        if (c == '!' || c == '"' || c == '#' || c == '$' || c == '%' || 
+            c == '&' || c == '\'' || c == '(' || c == ')') {
+            // Save any pending token before adding the special character
+            if (!currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
             }
+            // Add the special character as its own token
+            tokens.push_back(string(1, c));
+            continue;
         }
+        
+        // Handle '+' character (potential start of token type t2)
+        if (c == '+') {
+            // If we already have a token started, finalize it
+            if (!currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
+            }
+            currentToken += c;
+            continue;
+        }
+        
+        // Handle letters (potential start of token type t3)
+        if (isalpha(c)) {
+            // If current token is empty or is a '+' (which shouldn't be followed by a letter)
+            // or if current token ends with a digit (need to start a new token)
+            if (currentToken.empty() || 
+                (currentToken.length() == 1 && currentToken[0] == '+') ||
+                (!currentToken.empty() && isdigit(currentToken.back()))) {
+                
+                if (!currentToken.empty()) {
+                    tokens.push_back(currentToken);
+                    currentToken.clear();
+                }
+            }
+            currentToken += c;
+            continue;
+        }
+        
+        // Handle digits
+        if (isdigit(c)) {
+            // If current token is empty, or it ends with a letter and it's not just one letter
+            // (which would be the start of a t3 token), start a new token
+            if (currentToken.empty() || 
+                (!currentToken.empty() && isalpha(currentToken.back()) && currentToken.length() > 1)) {
+                
+                if (!currentToken.empty()) {
+                    tokens.push_back(currentToken);
+                    currentToken.clear();
+                }
+            }
+            currentToken += c;
+            continue;
+        }
+        
+        // For any other character, report scanner error
+        cout << "SCANNER ERROR: " << c << ", " << str << endl;
+        exit(1);
     }
-
-    // Add any remaining token at the end
-    if (!token.empty()) {
-        tokens.push_back(token);
+    
+    // Don't forget the last token
+    if (!currentToken.empty()) {
+        tokens.push_back(currentToken);
     }
-
+    
     return tokens;
 }
 
